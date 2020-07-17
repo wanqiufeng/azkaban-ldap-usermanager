@@ -7,8 +7,9 @@ This plugin enables ldap authentication for the Azkaban workflow manager (https:
 
 This plugin is work in progress, configuration options may change.
 
-##修改项
-去掉原来组想买个的信息。
+修改项
+------------
+去掉原来组相关的信息。
 只对azkaban用户开启管理员角色，其余都是read角色
 
 Installation
