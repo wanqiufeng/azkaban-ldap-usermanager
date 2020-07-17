@@ -57,10 +57,10 @@ public class LdapUserManager implements UserManager {
         ldapUEmailProperty = props.getString(LDAP_EMAIL_PROPERTY);
         ldapBindAccount = props.getString(LDAP_BIND_ACCOUNT);
         ldapBindPassword = props.getString(LDAP_BIND_PASSWORD);
-        ldapAllowedGroups = props.getStringList(LDAP_ALLOWED_GROUPS);
-        ldapAdminGroups = props.getStringList(LDAP_ADMIN_GROUPS);
-        ldapGroupSearchBase = props.getString(LDAP_GROUP_SEARCH_BASE);
-        ldapEmbeddedGroups = props.getBoolean(LDAP_EMBEDDED_GROUPS, false);
+        //ldapAllowedGroups = props.getStringList(LDAP_ALLOWED_GROUPS);
+        //ldapAdminGroups = props.getStringList(LDAP_ADMIN_GROUPS);
+        //ldapGroupSearchBase = props.getString(LDAP_GROUP_SEARCH_BASE);
+        //ldapEmbeddedGroups = props.getBoolean(LDAP_EMBEDDED_GROUPS, false);
     }
 
     @Override
@@ -93,9 +93,9 @@ public class LdapUserManager implements UserManager {
                 throw new UserManagerException("More than one user found");
             }
 
-            if (!isMemberOfGroups(connection, entry, ldapAllowedGroups)) {
+            /*if (!isMemberOfGroups(connection, entry, ldapAllowedGroups)) {
                 throw new UserManagerException("User is not member of allowed groups");
-            }
+            }*/
 
             connection.bind(entry.getDn(), password);
 
@@ -113,10 +113,17 @@ public class LdapUserManager implements UserManager {
                 user.setEmail(emailAttribute.getString());
             }
 
-            if (isMemberOfGroups(connection, entry, ldapAdminGroups)) {
+            if(username.equalsIgnoreCase("azkaban")) {
+                //只有azkaban用户时管理员，其它人只能读
+                user.addRole("admin");
+            } else {
+                user.addRole("read");
+            }
+
+/*            if (isMemberOfGroups(connection, entry, ldapAdminGroups)) {
                 logger.info("Granting admin access to user: " + username);
                 user.addRole("admin");
-            }
+            }*/
 
             return user;
 
@@ -242,6 +249,7 @@ public class LdapUserManager implements UserManager {
 
     @Override
     public boolean validateUser(String username) {
+        logger.info("current role is : " + username );
         if (username == null || username.trim().isEmpty()) {
             return false;
         }
@@ -292,11 +300,14 @@ public class LdapUserManager implements UserManager {
 
     @Override
     public boolean validateGroup(String group) {
-        return ldapAllowedGroups.contains(group);
+        logger.info("current group is : " + group );
+        return true;
+        //return ldapAllowedGroups.contains(group);
     }
 
     @Override
     public Role getRole(String roleName) {
+        logger.info("current role is : " + roleName );
         Permission permission = new Permission();
         permission.addPermissionsByName(roleName.toUpperCase());
         return new Role(roleName, permission);
